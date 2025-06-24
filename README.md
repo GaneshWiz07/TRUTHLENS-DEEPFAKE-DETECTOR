@@ -159,12 +159,6 @@ To enable advanced AI analysis:
 3. Add it to your Supabase project's environment variables
 4. The edge functions will automatically use it for enhanced detection
 
-### Chrome Extension Setup
-
-1. Navigate to `chrome-extension/` directory
-2. Follow the installation guide in `chrome-extension/README.md`
-3. Load the extension in Chrome Developer Mode
-4. Configure with your API token from the dashboard
 
 ## 🚀 Deployment
 
