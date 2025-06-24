@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, FileText, TrendingUp, AlertTriangle, CheckCircle, Trash2, MoreVertical, Music, BarChart3, Image, Key, Copy, RefreshCw, Eye, EyeOff, Brain, MapPin, Mic } from 'lucide-react';
+import { Calendar, FileText, TrendingUp, AlertTriangle, CheckCircle, Trash2, MoreVertical, Music, BarChart3, Image, Brain, MapPin, Mic } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { Analysis } from '../types';
 import { useAuth } from '../hooks/useAuth';
@@ -10,15 +10,11 @@ export function Dashboard() {
   const [deleting, setDeleting] = useState<string | null>(null);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [showBulkActions, setShowBulkActions] = useState(false);
-  const [apiToken, setApiToken] = useState<string>('');
-  const [showToken, setShowToken] = useState(false);
-  const [tokenCopied, setTokenCopied] = useState(false);
   const { user } = useAuth();
 
   useEffect(() => {
     if (user) {
       fetchAnalyses();
-      generateOrLoadApiToken();
     }
   }, [user]);
 
@@ -37,88 +33,6 @@ export function Dashboard() {
       console.error('Error fetching analyses:', error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const generateOrLoadApiToken = async () => {
-    try {
-      // Check if user already has an API token
-      const { data, error } = await supabase
-        .from('user_api_tokens')
-        .select('token')
-        .eq('user_id', user?.id)
-        .maybeSingle();
-
-      if (error) throw error;
-
-      if (data && data.token) {
-        setApiToken(data.token);
-      } else {
-        // Generate new token
-        const newToken = generateApiToken();
-        
-        // Save to database with proper conflict resolution
-        const { error: insertError } = await supabase
-          .from('user_api_tokens')
-          .upsert({
-            user_id: user?.id,
-            token: newToken,
-            created_at: new Date().toISOString(),
-            last_used: null
-          }, { onConflict: 'user_id' });
-
-        if (!insertError) {
-          setApiToken(newToken);
-        }
-      }
-    } catch (error) {
-      console.error('Error managing API token:', error);
-      // Generate a client-side token as fallback
-      const fallbackToken = generateApiToken();
-      setApiToken(fallbackToken);
-    }
-  };
-
-  const generateApiToken = () => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let token = 'tl_'; // TruthLens prefix
-    for (let i = 0; i < 32; i++) {
-      token += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return token;
-  };
-
-  const regenerateApiToken = async () => {
-    const newToken = generateApiToken();
-    
-    try {
-      const { error } = await supabase
-        .from('user_api_tokens')
-        .upsert({
-          user_id: user?.id,
-          token: newToken,
-          created_at: new Date().toISOString(),
-          last_used: null
-        }, { onConflict: 'user_id' });
-
-      if (!error) {
-        setApiToken(newToken);
-        alert('API token regenerated successfully!');
-      }
-    } catch (error) {
-      console.error('Error regenerating token:', error);
-      setApiToken(newToken);
-      alert('API token regenerated (stored locally)!');
-    }
-  };
-
-  const copyApiToken = async () => {
-    try {
-      await navigator.clipboard.writeText(apiToken);
-      setTokenCopied(true);
-      setTimeout(() => setTokenCopied(false), 2000);
-    } catch (error) {
-      console.error('Failed to copy token:', error);
     }
   };
 
@@ -385,67 +299,6 @@ export function Dashboard() {
               <p className="text-3xl font-bold text-blue-400">{stats.avgConfidence}%</p>
             </div>
             <TrendingUp className="h-8 w-8 text-blue-400" />
-          </div>
-        </div>
-      </div>
-
-      {/* API Token Section */}
-      <div className="glass rounded-2xl p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center space-x-3">
-            <Key className="h-6 w-6 text-purple-400" />
-            <div>
-              <h3 className="text-lg font-semibold text-white">API Token</h3>
-              <p className="text-sm text-gray-400">Use this token for Chrome extension and API access</p>
-            </div>
-          </div>
-          <button
-            onClick={regenerateApiToken}
-            className="flex items-center space-x-2 px-3 py-2 text-sm glass glass-hover rounded-lg transition-colors"
-          >
-            <RefreshCw className="h-4 w-4" />
-            <span>Regenerate</span>
-          </button>
-        </div>
-
-        <div className="space-y-4">
-          <div className="flex items-center space-x-3">
-            <div className="flex-1 relative">
-              <input
-                type={showToken ? 'text' : 'password'}
-                value={apiToken}
-                readOnly
-                className="w-full px-4 py-3 glass rounded-lg font-mono text-sm text-white"
-              />
-              <button
-                onClick={() => setShowToken(!showToken)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300"
-              >
-                {showToken ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
-            </div>
-            <button
-              onClick={copyApiToken}
-              className={`flex items-center space-x-2 px-4 py-3 rounded-lg transition-colors ${
-                tokenCopied 
-                  ? 'bg-green-500/20 text-green-400 border border-green-500/20' 
-                  : 'bg-gradient-to-r from-purple-500 to-blue-500 text-white hover:from-purple-600 hover:to-blue-600'
-              }`}
-            >
-              <Copy className="h-4 w-4" />
-              <span>{tokenCopied ? 'Copied!' : 'Copy'}</span>
-            </button>
-          </div>
-
-          <div className="glass rounded-lg p-4">
-            <h4 className="font-medium text-blue-300 mb-2">Chrome Extension Setup</h4>
-            <ol className="text-sm text-gray-300 space-y-1">
-              <li>1. Download and install the Chrome extension</li>
-              <li>2. Copy the API token above</li>
-              <li>3. Open the extension popup and paste the token</li>
-              <li>4. Set the API Base URL to: <code className="bg-white/10 px-1 rounded">{window.location.origin}</code></li>
-              <li>5. Right-click any image or video online to scan it!</li>
-            </ol>
           </div>
         </div>
       </div>
