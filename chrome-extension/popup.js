@@ -1,4 +1,4 @@
-// Popup script for DeepFake Detector Chrome Extension
+// Popup script for TruthLens Chrome Extension
 
 document.addEventListener('DOMContentLoaded', async () => {
   const apiUrlInput = document.getElementById('api-url');
@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (result.apiBaseUrl) {
     apiUrlInput.value = result.apiBaseUrl;
   } else {
-    apiUrlInput.value = 'http://localhost:5173';
+    apiUrlInput.value = 'https://fascinating-palmier-5bfe94.netlify.app';
   }
 
   // Load page information
@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     try {
       // Test the API connection
-      const testResponse = await fetch(`${apiUrl}/api/test`, {
+      const testResponse = await fetch(`${apiUrl}/functions/v1/api-test`, {
         headers: {
           'Authorization': `Bearer ${apiToken}`
         }
@@ -67,7 +67,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         showStatus('Settings saved successfully!', 'success');
       } else {
-        showStatus('Invalid API token or URL', 'error');
+        const errorData = await testResponse.json().catch(() => ({}));
+        showStatus(`Invalid API token or URL: ${errorData.error || 'Connection failed'}`, 'error');
       }
     } catch (error) {
       // Save anyway for offline testing

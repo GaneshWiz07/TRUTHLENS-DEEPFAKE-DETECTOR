@@ -1,14 +1,14 @@
-// Background script for DeepFake Detector Chrome Extension
+// Background script for TruthLens Chrome Extension
 
-let API_BASE_URL = 'http://localhost:5173'; // Default to local development
+let API_BASE_URL = 'https://fascinating-palmier-5bfe94.netlify.app'; // Default to production
 let API_TOKEN = '';
 
 // Initialize extension
 chrome.runtime.onInstalled.addListener(() => {
   // Create context menu
   chrome.contextMenus.create({
-    id: 'deepfake-detector',
-    title: 'Scan with DeepFake Detector',
+    id: 'truthlens-detector',
+    title: 'Scan with TruthLens',
     contexts: ['image', 'video']
   });
 
@@ -19,13 +19,16 @@ chrome.runtime.onInstalled.addListener(() => {
     }
     if (result.apiBaseUrl) {
       API_BASE_URL = result.apiBaseUrl;
+    } else {
+      // Set default URL if not configured
+      API_BASE_URL = 'https://fascinating-palmier-5bfe94.netlify.app';
     }
   });
 });
 
 // Handle context menu clicks
 chrome.contextMenus.onClicked.addListener((info, tab) => {
-  if (info.menuItemId === 'deepfake-detector') {
+  if (info.menuItemId === 'truthlens-detector') {
     if (!API_TOKEN) {
       // Show popup to set API token
       chrome.action.openPopup();
@@ -46,8 +49,8 @@ async function analyzeMedia(mediaUrl, tabId) {
     // Show loading notification
     chrome.notifications.create({
       type: 'basic',
-      iconUrl: 'icons/icon48.png',
-      title: 'DeepFake Detector',
+      iconUrl: 'icons/icon48.svg',
+      title: 'TruthLens',
       message: 'Analyzing media... Please wait.'
     });
 
@@ -66,7 +69,7 @@ async function analyzeMedia(mediaUrl, tabId) {
     formData.append('analysis_type', 'media');
 
     // Make API call to analyze
-    const analysisResponse = await fetch(`${API_BASE_URL}/api/analyze`, {
+    const analysisResponse = await fetch(`${API_BASE_URL}/functions/v1/api-analyze`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${API_TOKEN}`,
@@ -75,7 +78,9 @@ async function analyzeMedia(mediaUrl, tabId) {
     });
 
     if (!analysisResponse.ok) {
-      throw new Error('Analysis failed');
+      const errorText = await analysisResponse.text();
+      console.error('Analysis failed:', errorText);
+      throw new Error(`Analysis failed: ${analysisResponse.status}`);
     }
 
     const result = await analysisResponse.json();
@@ -84,8 +89,8 @@ async function analyzeMedia(mediaUrl, tabId) {
     const isDeepfake = result.result === 'deepfake';
     chrome.notifications.create({
       type: 'basic',
-      iconUrl: 'icons/icon48.png',
-      title: `DeepFake Detector - ${isDeepfake ? 'DEEPFAKE' : 'AUTHENTIC'}`,
+      iconUrl: 'icons/icon48.svg',
+      title: `TruthLens - ${isDeepfake ? 'DEEPFAKE' : 'AUTHENTIC'}`,
       message: `Confidence: ${result.confidence}% - Click to view details`,
       buttons: [
         { title: 'View Details' },
@@ -107,8 +112,8 @@ async function analyzeMedia(mediaUrl, tabId) {
     console.error('Analysis error:', error);
     chrome.notifications.create({
       type: 'basic',
-      iconUrl: 'icons/icon48.png',
-      title: 'DeepFake Detector - Error',
+      iconUrl: 'icons/icon48.svg',
+      title: 'TruthLens - Error',
       message: 'Failed to analyze media. Please check your API token and try again.'
     });
   }
@@ -139,7 +144,7 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
       API_TOKEN = changes.apiToken.newValue || '';
     }
     if (changes.apiBaseUrl) {
-      API_BASE_URL = changes.apiBaseUrl.newValue || 'http://localhost:5173';
+      API_BASE_URL = changes.apiBaseUrl.newValue || 'https://fascinating-palmier-5bfe94.netlify.app';
     }
   }
 });

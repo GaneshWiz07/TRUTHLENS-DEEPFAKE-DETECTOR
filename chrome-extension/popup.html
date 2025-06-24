@@ -132,7 +132,7 @@
     
     .result-header {
       display: flex;
-      justify-content: between;
+      justify-content: space-between;
       align-items: center;
       margin-bottom: 8px;
     }
@@ -150,12 +150,21 @@
     .hidden {
       display: none;
     }
+
+    .url-note {
+      background: rgba(59, 130, 246, 0.2);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 11px;
+      margin-top: 5px;
+    }
   </style>
 </head>
 <body>
   <div class="header">
     <div class="logo">🛡️</div>
-    <h1>DeepFake Detector</h1>
+    <h1>TruthLens</h1>
     <p class="subtitle">Chrome Extension</p>
   </div>
 
@@ -163,7 +172,10 @@
     <h3>Setup</h3>
     <div class="form-group">
       <label for="api-url">API Base URL</label>
-      <input type="text" id="api-url" placeholder="http://localhost:5173" />
+      <input type="text" id="api-url" placeholder="https://fascinating-palmier-5bfe94.netlify.app" />
+      <div class="url-note">
+        Use: https://fascinating-palmier-5bfe94.netlify.app
+      </div>
     </div>
     <div class="form-group">
       <label for="api-token">API Token</label>
@@ -190,7 +202,7 @@
     <p style="font-size: 12px; opacity: 0.9; margin: 0;">
       1. Set your API token above<br>
       2. Right-click any image or video<br>
-      3. Select "Scan with DeepFake Detector"<br>
+      3. Select "Scan with TruthLens"<br>
       4. View results in notifications
     </p>
   </div>
