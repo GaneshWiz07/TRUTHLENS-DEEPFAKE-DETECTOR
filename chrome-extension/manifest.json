@@ -1,0 +1,36 @@
+{
+  "manifest_version": 3,
+  "name": "DeepFake Detector",
+  "version": "1.0.0",
+  "description": "Right-click to detect deepfakes in images and videos instantly",
+  "permissions": [
+    "contextMenus",
+    "activeTab",
+    "storage",
+    "notifications"
+  ],
+  "host_permissions": [
+    "http://localhost:5173/*",
+    "https://*.netlify.app/*",
+    "https://*.supabase.co/*",
+    "https://*/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "DeepFake Detector"
+  },
+  "icons": {
+    "16": "icons/icon16.svg",
+    "48": "icons/icon48.svg",
+    "128": "icons/icon128.svg"
+  }
+}
