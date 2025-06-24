@@ -26,7 +26,6 @@ TruthLens is a cutting-edge web application that uses advanced AI and machine le
 - **🔄 Combined Analysis** - Multi-modal detection for coordinated misinformation
 - **📊 Real-time Results** - Instant analysis with confidence scores and visual explanations
 - **📱 Responsive Design** - Optimized for all devices from mobile to desktop
-- **🔌 Chrome Extension** - Right-click analysis on any webpage
 - **📈 Analytics Dashboard** - Comprehensive analysis history and statistics
 - **📄 PDF Reports** - Professional reports for legal and forensic use
 
