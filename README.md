@@ -12,7 +12,7 @@
   [![Vite](https://img.shields.io/badge/Vite-5.4.2-646CFF.svg)](https://vitejs.dev/)
 </div>
 
-LIVE SITE : [https://truthlens-ai-detect.netlify.app](https://truthlens-ai-detect.netlify.app)
+**LIVE SITE** : [https://truthlens-ai-detect.netlify.app](https://truthlens-ai-detect.netlify.app)
 ## 🚀 Overview
 
 TruthLens is a cutting-edge web application that uses advanced AI and machine learning models to detect deepfakes, AI-generated content, and synthetic media. Built with modern web technologies, it provides real-time analysis with detailed explanations and comprehensive reporting capabilities.
