@@ -1,0 +1,58 @@
+name: Keep Supabase Awake
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'  # Every 5 minutes
+  workflow_dispatch:        # Optional: Manual trigger
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase REST API
+        run: |
+          echo "Pinging Supabase to keep it awake..."
+          
+          # Ping the analyses table with a simple SELECT query (lightweight)
+          response=$(curl -s -w "%{http_code}" -o /tmp/response.json \
+            "${{ secrets.SUPABASE_URL }}/rest/v1/analyses?select=id&limit=1" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Content-Type: application/json")
+          
+          echo "HTTP Status Code: $response"
+          
+          if [ "$response" -eq 200 ]; then
+            echo "✅ Supabase ping successful!"
+          else
+            echo "❌ Supabase ping failed with status: $response"
+            echo "Response body:"
+            cat /tmp/response.json
+            exit 1
+          fi
+
+      - name: Ping Supabase Edge Function (Fallback)
+        if: failure()  # Only run if the REST API ping fails
+        run: |
+          echo "Attempting fallback ping to Edge Function..."
+          
+          # Ping a simple edge function endpoint
+          response=$(curl -s -w "%{http_code}" -o /tmp/edge_response.json \
+            "${{ secrets.SUPABASE_URL }}/functions/v1/api-test" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Content-Type: application/json")
+          
+          echo "Edge Function HTTP Status Code: $response"
+          
+          if [ "$response" -eq 200 ] || [ "$response" -eq 401 ]; then
+            echo "✅ Edge Function ping successful (service is awake)!"
+          else
+            echo "❌ Edge Function ping failed with status: $response"
+            echo "Response body:"
+            cat /tmp/edge_response.json
+          fi
+
+      - name: Log Ping Results
+        run: |
+          echo "Ping completed at: $(date -u)"
+          echo "This workflow runs every 5 minutes to prevent Supabase from going to sleep."
